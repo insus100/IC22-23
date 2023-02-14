@@ -1,0 +1,22 @@
+{
+  "name": "ic22-23",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000I\u0000C\u00002\u00002\u0000-\u00002\u00003\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/insus100/IC22-23.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/insus100/IC22-23/issues"
+  },
+  "homepage": "https://github.com/insus100/IC22-23#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
