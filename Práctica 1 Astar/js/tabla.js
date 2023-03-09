@@ -4,8 +4,8 @@ let escenario = [];
 let tablaElement = null, filasElement = null, colsElement = null;
 let filas = 10, columnas = 10;
 
-let openSet = []; //Lista de abiertos.
-let closedSet = []; //Lista de cerrados
+let nAbiertos = []; //Lista de abiertos.
+let nCerrados = []; //Lista de cerrados
 
 let inicio = null; //punto de inicio
 let fin = null; // fin (meta)
@@ -40,9 +40,9 @@ function drawTable(f, c) {
 
     for (let i = 0; i < f; i++) {
         for (let j = 0; j < c; j++) {
-          escenario[i][j].actualizarContiguos(escenario);
+            escenario[i][j].actualizarContiguos(escenario);
         }
-      }
+    }
 }
 function buttonClick(_mode) {
     mode = _mode;
@@ -52,6 +52,10 @@ function buttonClick(_mode) {
             break;
         }
         case 'reset': {
+            inicio = fin = null;
+            nAbiertos = [];
+            nCerrados = [];
+            path = [];
             drawTable(filas, columnas);
             break;
         } case 'comenzar': {
@@ -59,6 +63,14 @@ function buttonClick(_mode) {
                 messageElement.innerText = 'Debes definir un inicio y un final.';
                 return;
             }
+            nAbiertos.push(inicio);
+            //console.log(search());
+            const result = search();
+            result.forEach((n) => {
+              const cell = getCell(n.x, n.y);
+              removeColors(cell);
+              cell.classList.add('table-dark');
+            });
             break;
         }
     }
@@ -68,7 +80,9 @@ function cellClick(x, y) {
     console.log("cellClick", x, y);
     messageElement.innerText = "";
     const cell = getCell(x, y);
+    const nodo = escenario[x][y];
     if(mode === 'prohibido') {
+        nodo.prohibido = true;
         removeColors(cell);
         cell.classList.add('table-danger');
     } else if(mode === 'inicio') {
@@ -78,7 +92,7 @@ function cellClick(x, y) {
         }
         removeColors(cell);
         cell.classList.add('table-primary');
-        inicio = cell;
+        inicio = nodo;
     } else if(mode === 'meta') {
         if(fin !== null) {
             messageElement.innerText = 'Ya has definido el final.';
@@ -86,7 +100,8 @@ function cellClick(x, y) {
         }
         removeColors(cell);
         cell.classList.add('table-success');
-        fin = cell;
+        fin = nodo;
+        console.log("fin", fin);
     } else if(mode === 'borrar') {
         removeColors(cell);
         if(cell === inicio) inicio = null;
@@ -111,24 +126,31 @@ function filasColsChange() {
         drawTable(filas, columnas);
 }
 
+function heuristic(position0, position1) {
+  let d1 = Math.abs(position1.x - position0.x);
+  let d2 = Math.abs(position1.y - position0.y);
+
+  return d1 + d2;
+}
+
 function search() {
-    init();
-    while (openSet.length > 0) {
+    //init();
+    while (nAbiertos.length > 0) {
       //assumption lowest index is the first one to begin with
       let lowestIndex = 0;
-      for (let i = 0; i < openSet.length; i++) {
-        if (openSet[i].f < openSet[lowestIndex].f) {
+      for (let i = 0; i < nAbiertos.length; i++) {
+        if (nAbiertos[i].f < nAbiertos[lowestIndex].f) {
           lowestIndex = i;
         }
       }
-      let current = openSet[lowestIndex];
+      let actual = nAbiertos[lowestIndex];
   
-      if (current === end) {
-        let temp = current;
+      if (actual === fin) {
+        let temp = actual;
         path.push(temp);
-        while (temp.parent) {
-          path.push(temp.parent);
-          temp = temp.parent;
+        while (temp.padre) {
+          path.push(temp.padre);
+          temp = temp.padre;
         }
         console.log("DONE!");
         // return the traced path
@@ -136,28 +158,28 @@ function search() {
       }
   
       //remove current from openSet
-      openSet.splice(lowestIndex, 1);
+      nAbiertos.splice(lowestIndex, 1);
       //add current to closedSet
-      closedSet.push(current);
+      nCerrados.push(actual);
   
-      let neighbors = current.neighbors;
+      let contiguos = actual.contiguos;
   
-      for (let i = 0; i < neighbors.length; i++) {
-        let neighbor = neighbors[i];
+      for (let i = 0; i < contiguos.length; i++) {
+        let contiguo = contiguos[i];
+        if(contiguo.prohibido) continue;
+        if (!nCerrados.includes(contiguo)) {
+          let possibleG = actual.g + 1;
   
-        if (!closedSet.includes(neighbor)) {
-          let possibleG = current.g + 1;
-  
-          if (!openSet.includes(neighbor)) {
-            openSet.push(neighbor);
-          } else if (possibleG >= neighbor.g) {
+          if (!nAbiertos.includes(contiguo)) {
+            nAbiertos.push(contiguo);
+          } else if (possibleG >= contiguo.g) {
             continue;
           }
   
-          neighbor.g = possibleG;
-          neighbor.h = heuristic(neighbor, end);
-          neighbor.f = neighbor.g + neighbor.h;
-          neighbor.parent = current;
+          contiguo.g = possibleG;
+          contiguo.h = heuristic(contiguo, fin);
+          contiguo.f = contiguo.g + contiguo.h;
+          contiguo.padre = actual;
         }
       }
     }
@@ -174,18 +196,19 @@ function Nodo(x, y) {
     this.h = 0; //coste heurístico estimado del punto actual a la meta
     this.contiguos = []; // puntos contiguos al actual
     this.padre = undefined; // punto anterior al punto actual.
+    this.prohibido = false;
   
-    // update neighbors array for a given grid point
+    // actualizar los contiguos de un punto
     this.actualizarContiguos = function (grid) {
       let i = this.x;
       let j = this.y;
-      if (i < cols - 1) {
+      if (i < columnas - 1) {
         this.contiguos.push(grid[i + 1][j]);
       }
       if (i > 0) {
         this.contiguos.push(grid[i - 1][j]);
       }
-      if (j < rows - 1) {
+      if (j < filas - 1) {
         this.contiguos.push(grid[i][j + 1]);
       }
       if (j > 0) {
