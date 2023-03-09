@@ -10,6 +10,7 @@ let nCerrados = []; //Lista de cerrados
 let inicio = null; //punto de inicio
 let fin = null; // fin (meta)
 let path = [];
+let waypoints = [];
 
 function onPageLoad() {
     messageElement = document.getElementById('msg');
@@ -29,7 +30,7 @@ function drawTable(f, c) {
         let row = tablaElement.insertRow(i);
         for(let j = 0; j < c; j++) {
             let cell = row.insertCell(j); //insert cells to each row
-            cell.innerHTML = "#";
+            //cell.innerHTML = "#";
             cell.id = `${i}-${j}`;
             cell.addEventListener('click', function(){
                 cellClick(i, j);
@@ -56,6 +57,7 @@ function buttonClick(_mode) {
             nAbiertos = [];
             nCerrados = [];
             path = [];
+            waypoints = [];
             drawTable(filas, columnas);
             break;
         } case 'comenzar': {
@@ -66,10 +68,13 @@ function buttonClick(_mode) {
             nAbiertos.push(inicio);
             //console.log(search());
             const result = search();
+            if(result.length === 0) {
+              messageElement.innerText = 'No hay camino posible.';
+              return;
+            }
             result.forEach((n) => {
               const cell = getCell(n.x, n.y);
-              removeColors(cell);
-              cell.classList.add('table-dark');
+              pintar(cell, 'table-info');
             });
             break;
         }
@@ -84,33 +89,39 @@ function cellClick(x, y) {
     if(mode === 'prohibido') {
       if(!nodo.prohibido) {
         nodo.prohibido = true;
-        removeColors(cell);
-        cell.classList.add('table-danger');
+        pintar(cell, 'table-danger');
       }
     } else if(mode === 'inicio') {
         if(inicio !== null) {
             messageElement.innerText = 'Ya has definido el inicio.';
             return;
         }
-        removeColors(cell);
-        cell.classList.add('table-primary');
+        pintar(cell, 'table-primary');
         inicio = nodo;
     } else if(mode === 'meta') {
         if(fin !== null) {
             messageElement.innerText = 'Ya has definido el final.';
             return;
         }
-        removeColors(cell);
-        cell.classList.add('table-success');
+        pintar(cell, 'table-success');
         fin = nodo;
         console.log("fin", fin);
     } else if(mode === 'borrar') {
         removeColors(cell);
         if(nodo === inicio) inicio = null;
         if(nodo == fin) fin = null;
+    } else if(mode === 'waypoint') {
+      if(!nodo.waypoint) {
+        nodo.waypoint = true;
+        pintar(cell, 'table-warning');
+        waypoints.push(nodo);
+      }
     }
 }
-
+function pintar(celda, color) {
+  removeColors(celda);
+  celda.classList.add(color);
+}
 function removeColors(cell) {
     cell.classList.remove('table-danger');
     cell.classList.remove('table-primary');
@@ -155,7 +166,7 @@ function search() {
           temp = temp.padre;
         }
         console.log("DONE!");
-        // return the traced path
+        // devuelve el camino trazado.
         return path.reverse();
       }
   
@@ -199,6 +210,7 @@ function Nodo(x, y) {
     this.contiguos = []; // puntos contiguos al actual
     this.padre = undefined; // punto anterior al punto actual.
     this.prohibido = false;
+    this.waypoint = false;
   
     // actualizar los contiguos de un punto
     this.actualizarContiguos = function (grid) {
