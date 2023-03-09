@@ -82,9 +82,11 @@ function cellClick(x, y) {
     const cell = getCell(x, y);
     const nodo = escenario[x][y];
     if(mode === 'prohibido') {
+      if(!nodo.prohibido) {
         nodo.prohibido = true;
         removeColors(cell);
         cell.classList.add('table-danger');
+      }
     } else if(mode === 'inicio') {
         if(inicio !== null) {
             messageElement.innerText = 'Ya has definido el inicio.';
@@ -104,8 +106,8 @@ function cellClick(x, y) {
         console.log("fin", fin);
     } else if(mode === 'borrar') {
         removeColors(cell);
-        if(cell === inicio) inicio = null;
-        if(cell == fin) fin = null;
+        if(nodo === inicio) inicio = null;
+        if(nodo == fin) fin = null;
     }
 }
 
@@ -213,6 +215,20 @@ function Nodo(x, y) {
       }
       if (j > 0) {
         this.contiguos.push(grid[i][j - 1]);
+      }
+
+      //diagonales:
+      if (i > 0 && j > 0) {
+        this.contiguos.push(grid[i - 1][j - 1]); // superior izquierda
+      }
+      if (i > 0 && j < columnas - 1) {
+        this.contiguos.push(grid[i - 1][j + 1]); // superior derecha
+      }
+      if (i < filas - 1 && j > 0) {
+        this.contiguos.push(grid[i + 1][j - 1]); // inferior izquierda
+      }
+      if (i < filas - 1 && j < columnas - 1) {
+        this.contiguos.push(grid[i + 1][j + 1]); // inferior derecha
       }
     };
   }
