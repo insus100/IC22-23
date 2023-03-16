@@ -127,18 +127,11 @@ function cellClick(x, y) {
         pintar(cell, 'table-warning');
         waypoints.push(nodo);
       }
-<<<<<<< HEAD
-    }else if(mode === 'montania') {
-      removeColors(cell);
-      pintar(cell, 'table-secondary');
-  }
-=======
     } else if(mode === 'peligro') {
       pintar(cell, 'table-dark');
       nodo.peligro = true;
       peligro.push(nodo);
     }
->>>>>>> a74ebf3661c84d9e62e892f51ab60c3ac1f4bf75
 }
 function pintar(celda, color) {
   removeColors(celda);
