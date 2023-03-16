@@ -119,6 +119,7 @@ function cellClick(x, y) {
         if(nodo.prohibido) nodo.prohibido = false;
         if(nodo.waypoint) nodo.waypoint = false;
         if(nodo.peligro) nodo.peligro = false;
+        if(nodo.montania) nodo.montania = false;
         if(nodo === inicio) inicio = null;
         if(nodo == fin) fin = null;
     } else if(mode === 'waypoint') {
@@ -131,7 +132,11 @@ function cellClick(x, y) {
       pintar(cell, 'table-dark');
       nodo.peligro = true;
       peligro.push(nodo);
+    }else if(mode === 'montania') {
+      pintar(cell, 'table-secondary');
+      nodo.montania = true;
     }
+
 }
 function pintar(celda, color) {
   removeColors(celda);
@@ -239,6 +244,7 @@ function Nodo(x, y) {
     this.prohibido = false;
     this.waypoint = false;
     this.peligro = false;
+    this.montania = false;
   
     // actualizar los contiguos de un punto
     this.actualizarContiguos = function (grid) {
