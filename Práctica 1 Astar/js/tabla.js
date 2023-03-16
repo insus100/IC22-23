@@ -10,7 +10,8 @@ let nCerrados = []; //Lista de cerrados
 let inicio = null; //punto de inicio
 let fin = null; // fin (meta)
 let path = [];
-let waypoints = [];
+let waypoints = [], currentWaypoint = 0;
+let peligro = [];
 
 function onPageLoad() {
     messageElement = document.getElementById('msg');
@@ -62,6 +63,8 @@ function buttonClick(_mode) {
             nCerrados = [];
             path = [];
             waypoints = [];
+            currentWaypoint = 0;
+            peligro = [];
             drawTable(filas, columnas);
             break;
         } case 'comenzar': {
@@ -71,6 +74,7 @@ function buttonClick(_mode) {
             }
             nAbiertos.push(inicio);
             //console.log(search());
+            console.log(waypoints);
             const result = search();
             if(result.length === 0) {
               messageElement.innerText = 'No hay camino posible.';
@@ -112,6 +116,9 @@ function cellClick(x, y) {
         console.log("fin", fin);
     } else if(mode === 'borrar') {
         removeColors(cell);
+        if(nodo.prohibido) nodo.prohibido = false;
+        if(nodo.waypoint) nodo.waypoint = false;
+        if(nodo.peligro) nodo.peligro = false;
         if(nodo === inicio) inicio = null;
         if(nodo == fin) fin = null;
     } else if(mode === 'waypoint') {
@@ -120,10 +127,18 @@ function cellClick(x, y) {
         pintar(cell, 'table-warning');
         waypoints.push(nodo);
       }
+<<<<<<< HEAD
     }else if(mode === 'montania') {
       removeColors(cell);
       pintar(cell, 'table-secondary');
   }
+=======
+    } else if(mode === 'peligro') {
+      pintar(cell, 'table-dark');
+      nodo.peligro = true;
+      peligro.push(nodo);
+    }
+>>>>>>> a74ebf3661c84d9e62e892f51ab60c3ac1f4bf75
 }
 function pintar(celda, color) {
   removeColors(celda);
@@ -133,6 +148,9 @@ function removeColors(cell) {
     cell.classList.remove('table-danger');
     cell.classList.remove('table-primary');
     cell.classList.remove('table-success');
+    cell.classList.remove('table-dark');
+    cell.classList.remove('table-warning');
+    cell.classList.remove('table-secondary');
 }
 
 function getCell(x, y) {
@@ -147,6 +165,7 @@ function filasColsChange() {
 }
 
 function heuristic(position0, position1) {
+  console.log("heuristic", position0, position1);
   let d1 = Math.abs(position1.x - position0.x);
   let d2 = Math.abs(position1.y - position0.y);
 
@@ -164,7 +183,14 @@ function search() {
         }
       }
       let actual = nAbiertos[lowestIndex];
-  
+      let _fin;
+      if(waypoints.length === 0 || waypoints.length === currentWaypoint) {
+        _fin = fin;
+      } else {
+        if(waypoints[currentWaypoint] == actual) currentWaypoint++;
+        if(waypoints.length === currentWaypoint) _fin = fin;
+        else _fin = waypoints[currentWaypoint];
+      }
       if (actual === fin) {
         let temp = actual;
         path.push(temp);
@@ -197,7 +223,8 @@ function search() {
           }
   
           contiguo.g = possibleG;
-          contiguo.h = heuristic(contiguo, fin);
+          contiguo.h = heuristic(contiguo, _fin);
+          if(contiguo.peligro) contiguo.h += 1.5;
           contiguo.f = contiguo.g + contiguo.h;
           contiguo.padre = actual;
         }
@@ -218,6 +245,7 @@ function Nodo(x, y) {
     this.padre = undefined; // punto anterior al punto actual.
     this.prohibido = false;
     this.waypoint = false;
+    this.peligro = false;
   
     // actualizar los contiguos de un punto
     this.actualizarContiguos = function (grid) {
