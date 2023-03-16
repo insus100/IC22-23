@@ -2,7 +2,7 @@ let mode = null;
 let messageElement = null;
 let escenario = [];
 let tablaElement = null, filasElement = null, colsElement = null;
-let filas = 10, columnas = 10;
+let filas = 10, columnas = 10, alturaM = 1000, alturaA = 1000;
 
 let nAbiertos = []; //Lista de abiertos.
 let nCerrados = []; //Lista de cerrados
@@ -14,8 +14,12 @@ let waypoints = [];
 
 function onPageLoad() {
     messageElement = document.getElementById('msg');
+    alturaMontania = document.getElementById('alturaMontania');
+    alturaAvion = document.getElementById('alturaAvion');
     filasElement = document.getElementById('filasElement');
     colsElement = document.getElementById('colsElement');
+    alturaMontania.value = alturaM;
+    alturaAvion.value = alturaA;
     filasElement.value = filas;
     colsElement.value = columnas;
     tablaElement = document.getElementById('tabla');
@@ -116,7 +120,10 @@ function cellClick(x, y) {
         pintar(cell, 'table-warning');
         waypoints.push(nodo);
       }
-    }
+    }else if(mode === 'montania') {
+      removeColors(cell);
+      pintar(cell, 'table-secondary');
+  }
 }
 function pintar(celda, color) {
   removeColors(celda);
