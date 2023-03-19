@@ -94,14 +94,22 @@ function cellClick(x, y) {
     const cell = getCell(x, y);
     const nodo = escenario[x][y];
     if(mode === 'prohibido') {
+      if(nodo.waypoint) {
+        messageElement.innerText = 'No puedes poner un waypoint aquí.';
+        return;
+      }
       if(!nodo.prohibido) {
         nodo.prohibido = true;
         pintar(cell, 'table-danger');
       }
     } else if(mode === 'inicio') {
         if(gInicio !== null) {
-            messageElement.innerText = 'Ya has definido el inicio.';
-            return;
+          messageElement.innerText = 'Ya has definido el inicio.';
+          return;
+        }
+        if(nodo.waypoint) {
+          messageElement.innerText = 'No puedes poner un waypoint en el inicio.';
+          return;
         }
         pintar(cell, 'table-primary');
         gInicio = nodo;
@@ -109,6 +117,10 @@ function cellClick(x, y) {
         if(gFin !== null) {
             messageElement.innerText = 'Ya has definido el final.';
             return;
+        }
+        if(nodo.waypoint) {
+          messageElement.innerText = 'No puedes poner un waypoint en la meta.';
+          return;
         }
         pintar(cell, 'table-success');
         gFin = nodo;
@@ -125,16 +137,28 @@ function cellClick(x, y) {
         if(nodo === gInicio) gInicio = null;
         if(nodo == gFin) gFin = null;
     } else if(mode === 'waypoint') {
+      if(gInicio !== null && gInicio == nodo || gFin !== null && gFin == nodo) {
+        messageElement.innerText = 'No puedes poner un waypoint aquí.';
+        return;
+      }
       if(!nodo.waypoint) {
         nodo.waypoint = true;
         pintar(cell, 'table-warning');
         waypoints.push(nodo);
       }
     } else if(mode === 'peligro') {
+      if(nodo.waypoint) {
+        messageElement.innerText = 'No puedes poner un waypoint aquí.';
+        return;
+      }
       pintar(cell, 'table-dark');
       nodo.peligro = true;
       peligro.push(nodo);
     }else if(mode === 'montania') {
+      if(nodo.waypoint) {
+        messageElement.innerText = 'No puedes poner un waypoint aquí.';
+        return;
+      }
       pintar(cell, 'table-secondary');
       nodo.montania = true;
     }
@@ -160,6 +184,14 @@ function getCell(x, y) {
 function filasColsChange() {
     filas = filasElement.value;
     columnas = colsElement.value;
+    if(filas > 50) {
+      filas = 50;
+      filasElement.value = 50;
+    } 
+    if(columnas > 50) {
+      columnas = 50;
+      colsElement.value = 50;
+    }
     if(filas > 0 && columnas > 0)
         drawTable(filas, columnas);
 }
