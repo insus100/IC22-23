@@ -137,7 +137,7 @@ function cellClick(x, y) {
         if(nodo === gInicio) gInicio = null;
         if(nodo == gFin) gFin = null;
     } else if(mode === 'waypoint') {
-      if(gInicio !== null && gInicio == nodo || gFin !== null && gFin == nodo) {
+      if(gInicio !== null && gInicio == nodo || gFin !== null && gFin == nodo || nodo.prohibido || nodo.peligro || nodo.montania) {
         messageElement.innerText = 'No puedes poner un waypoint aquí.';
         return;
       }
