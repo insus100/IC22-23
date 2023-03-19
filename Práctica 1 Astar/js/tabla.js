@@ -1,8 +1,8 @@
 let mode = null;
 let messageElement = null;
 let escenario = [];
-let tablaElement = null, filasElement = null, colsElement = null;
-let filas = 10, columnas = 10, alturaM = 1000, alturaA = 1000;
+let tablaElement = null, filasElement = null, colsElement = null, alturaMontania = null, alturaAvion = null;
+let filas = 10, columnas = 10, alturaM = 0, alturaA = 0;
 
 let nAbiertos = []; //Lista de abiertos.
 let nCerrados = []; //Lista de cerrados
@@ -10,7 +10,7 @@ let nCerrados = []; //Lista de cerrados
 let gInicio = null; //punto de inicio
 let gFin = null; // fin (meta)
 let path = [];
-let waypoints = [], currentWaypoint = 0;
+let waypoints = [];
 let peligro = [];
 
 function onPageLoad() {
@@ -63,7 +63,6 @@ function buttonClick(_mode) {
             nCerrados = [];
             path = [];
             waypoints = [];
-            currentWaypoint = 0;
             peligro = [];
             drawTable(filas, columnas);
             break;
@@ -90,7 +89,7 @@ function buttonClick(_mode) {
 }
 
 function cellClick(x, y) {
-    console.log("cellClick", x, y);
+    //console.log("cellClick", x, y);
     messageElement.innerText = "";
     const cell = getCell(x, y);
     const nodo = escenario[x][y];
@@ -165,6 +164,11 @@ function filasColsChange() {
         drawTable(filas, columnas);
 }
 
+function alturaChange(){
+  alturaM = alturaMontania.value;
+  alturaA = alturaAvion.value;
+}
+
 function heuristic(position0, position1) {
   //console.log("heuristic", position0, position1);
   let d1 = Math.abs(position1.x - position0.x);
@@ -206,6 +210,7 @@ function search(fin) {
       for (let i = 0; i < contiguos.length; i++) {
         let contiguo = contiguos[i];
         if(contiguo.prohibido) continue;
+        if(alturaM !== 0 && alturaA !== 0 && contiguo.montania && alturaA <= alturaM) continue;
         if (!nCerrados.includes(contiguo)) {
           let possibleG = actual.g + 1;
   
