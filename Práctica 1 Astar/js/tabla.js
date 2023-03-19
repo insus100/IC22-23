@@ -159,6 +159,10 @@ function cellClick(x, y) {
         messageElement.innerText = 'No puedes poner un waypoint aquí.';
         return;
       }
+      if(alturaA === 0 || alturaM === 0) {
+        messageElement.innerText = 'Debes definir la altura del avión y de las montañas.';
+        return;
+      }
       pintar(cell, 'table-secondary');
       nodo.montania = true;
     }
