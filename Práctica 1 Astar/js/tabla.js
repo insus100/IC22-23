@@ -7,8 +7,8 @@ let filas = 10, columnas = 10, alturaM = 1000, alturaA = 1000;
 let nAbiertos = []; //Lista de abiertos.
 let nCerrados = []; //Lista de cerrados
 
-let inicio = null; //punto de inicio
-let fin = null; // fin (meta)
+let gInicio = null; //punto de inicio
+let gFin = null; // fin (meta)
 let path = [];
 let waypoints = [], currentWaypoint = 0;
 let peligro = [];
@@ -58,7 +58,7 @@ function buttonClick(_mode) {
             break;
         }
         case 'reset': {
-            inicio = fin = null;
+            gInicio = gFin = null;
             nAbiertos = [];
             nCerrados = [];
             path = [];
@@ -68,14 +68,14 @@ function buttonClick(_mode) {
             drawTable(filas, columnas);
             break;
         } case 'comenzar': {
-            if(inicio === null || fin === null) {
+            if(gInicio === null || gFin === null) {
                 messageElement.innerText = 'Debes definir un inicio y un final.';
                 return;
             }
-            nAbiertos.push(inicio);
+            nAbiertos.push(gInicio);
             //console.log(search());
-            console.log(waypoints);
-            const result = search();
+            //console.log(waypoints);
+            const result = waypoints.length === 0 ? search(gFin) : searchWaypoint();
             if(result.length === 0) {
               messageElement.innerText = 'No hay camino posible.';
               return;
@@ -100,28 +100,31 @@ function cellClick(x, y) {
         pintar(cell, 'table-danger');
       }
     } else if(mode === 'inicio') {
-        if(inicio !== null) {
+        if(gInicio !== null) {
             messageElement.innerText = 'Ya has definido el inicio.';
             return;
         }
         pintar(cell, 'table-primary');
-        inicio = nodo;
+        gInicio = nodo;
     } else if(mode === 'meta') {
-        if(fin !== null) {
+        if(gFin !== null) {
             messageElement.innerText = 'Ya has definido el final.';
             return;
         }
         pintar(cell, 'table-success');
-        fin = nodo;
-        console.log("fin", fin);
+        gFin = nodo;
+        console.log("fin", gFin);
     } else if(mode === 'borrar') {
         removeColors(cell);
         if(nodo.prohibido) nodo.prohibido = false;
-        if(nodo.waypoint) nodo.waypoint = false;
+        if(nodo.waypoint) {
+          nodo.waypoint = false;
+          waypoints.splice(waypoints.indexOf(nodo), 1);
+        }
         if(nodo.peligro) nodo.peligro = false;
         if(nodo.montania) nodo.montania = false;
-        if(nodo === inicio) inicio = null;
-        if(nodo == fin) fin = null;
+        if(nodo === gInicio) gInicio = null;
+        if(nodo == gFin) gFin = null;
     } else if(mode === 'waypoint') {
       if(!nodo.waypoint) {
         nodo.waypoint = true;
@@ -163,14 +166,14 @@ function filasColsChange() {
 }
 
 function heuristic(position0, position1) {
-  console.log("heuristic", position0, position1);
+  //console.log("heuristic", position0, position1);
   let d1 = Math.abs(position1.x - position0.x);
   let d2 = Math.abs(position1.y - position0.y);
 
   return d1 + d2;
 }
 
-function search() {
+function search(fin) {
     //init();
     while (nAbiertos.length > 0) {
       //assumption lowest index is the first one to begin with
@@ -181,14 +184,6 @@ function search() {
         }
       }
       let actual = nAbiertos[lowestIndex];
-      let _fin;
-      if(waypoints.length === 0 || waypoints.length === currentWaypoint) {
-        _fin = fin;
-      } else {
-        if(waypoints[currentWaypoint] == actual) currentWaypoint++;
-        if(waypoints.length === currentWaypoint) _fin = fin;
-        else _fin = waypoints[currentWaypoint];
-      }
       if (actual === fin) {
         let temp = actual;
         path.push(temp);
@@ -221,8 +216,8 @@ function search() {
           }
   
           contiguo.g = possibleG;
-          contiguo.h = heuristic(contiguo, _fin);
-          if(contiguo.peligro) contiguo.h += 1.5;
+          contiguo.h = heuristic(contiguo, fin);
+          if(contiguo.peligro) contiguo.h += 1.1;
           contiguo.f = contiguo.g + contiguo.h;
           contiguo.padre = actual;
         }
@@ -231,7 +226,56 @@ function search() {
   
     //no solution by default
     return [];
+}
+
+function searchWaypoint() {//cada vez que se llame al algoritmo hay que reiniciar nabiertos y ncerrados
+  console.log(waypoints);
+  let sol = [];
+  waypoints.push(gFin)
+  let meta = nextWayPoint(gInicio);
+  waypoints.splice(waypoints.indexOf(meta), 1);//borramos el waypoint seleccionado (el mas cercano al nodo actual)
+  let aux = search(meta);//hasta el primer waypoint
+  if(aux.length === 0)
+    return [];
+  sol = aux;
+
+  let inicio = null;
+  while(waypoints.length > 0) {
+    inicio = meta;
+    inicio.reset();
+    meta = nextWayPoint(inicio);
+    meta.reset();
+    waypoints.splice(waypoints.indexOf(meta), 1);
+    nAbiertos = [inicio];
+    nCerrados = [];
+    path = [];
+    aux = search(meta);
+
+    if(aux.length !== 0) {
+      aux.splice(0, 1);//se borra el inicio que ya estaba como meta en sol
+      sol = sol.concat(aux);
+    } else {
+      return [];
+    }
   }
+  return sol;
+}
+
+function nextWayPoint(_inicio) {
+  if(waypoints.length > 0) {
+    let minDistance = heuristic(waypoints[0], _inicio);
+    let minIndex = 0;
+    for(let i = 0; i < waypoints.length; i++) {
+      if(minDistance > heuristic(waypoints[i], _inicio)
+        && waypoints[i] !== gFin) {
+          minDistance = heuristic(waypoints[i], _inicio);
+          minIndex = i;
+        }
+    }
+    return waypoints[minIndex];
+  }
+  return null;
+}
 
 function Nodo(x, y) {
     this.x = x; //posicion x
@@ -277,4 +321,10 @@ function Nodo(x, y) {
         this.contiguos.push(grid[i + 1][j + 1]); // inferior derecha
       }
     };
+
+    this.reset = function() {
+      this.g = 0;
+      this.h = 0;
+      this.padre = undefined;
+    }
   }
