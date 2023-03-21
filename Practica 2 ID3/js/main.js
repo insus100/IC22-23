@@ -8,10 +8,6 @@ function onPageLoad(){
     nombreJuegoElem.addEventListener('change', (event)=> readTextFile(event));
 }
 
-function nombreJuegoChange(){
-    nombreJuego = nombreJuegoElem.value;
-}
-
 function readTextFile(event)
 {
     const fileList = event.target.files;
