@@ -7,13 +7,13 @@
         <link href="./css/style.css" rel="stylesheet">
     </head>
     <body onload="onPageLoad()">
-<h1>
+<h1 class="text-center">
   ID3 Íñigo Begoña y Javier
 </h1>
       </nav>
         <div class="container w-75">
             
-            <div class="row g-3 mt-3">
+            <div class="row g-3 mt-3 red">
                 <div class="col-auto">
                   <label for="nomAtrib" class="form-label">Nombre fichero atributos</label>
                   <input type="file" class="form-control" id="nomAtrib" placeholder="Nombre fichero atributos">
@@ -22,6 +22,9 @@
                   <label for="nomJuego" class="form-label">Nombre fichero juego</label>
                   <input type="file" class="form-control" id="nomJuego" placeholder="Nombre fichero juego">
                 </div>
+                <div class="col-auto">
+                  <button type="button" id="buttonJugar" class="btn btn-primary buttonIniciar" onclick="buttonClick('iniciar')">Ejecutar algoritmo</button>
+              </div>
             </div>
             <p id="msg" class="text-danger"></p>
         </div>
