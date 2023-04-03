@@ -82,7 +82,7 @@ function id3(numLlamadas) {
     let cols = atributos.length;
     let rows = juego.length;
 
-    if(cols === 1) return
+    if(cols === 2) return
 
     let merito = {};
     let numeroAtrs = {};
@@ -182,7 +182,7 @@ function pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas) 
         htmlCode += '</tbody></table>'
     }
 
-    if(atributos.length > 2) {
+    //if(atributos.length > 2) {
         htmlCode += '<h2>Méritos</h2>'
         let N = 0
         for(let atr of atributos) {
@@ -206,10 +206,14 @@ function pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas) 
         htmlCode += '<br>'
         htmlCode += '<hr style="height:2px;border-width:0;color:black;background-color:black">'
         htmlCode += '<br>'
-    }
+
+        if(atributos.length === 3) {
+            htmlCode += '<br><h5 align="center"><i>Los atributos mínimos del árbol: ' + sol + '</i></h5>'
+        }
+    /*}
     else {
-        htmlCode += '<br><h5 align="center"><i>El árbol mínimo es: ' + sol + '</i></h5>'
-    }
+        htmlCode += '<br><h5 align="center"><i>Los atributos mínimos del árbol: ' + sol + '</i></h5>'
+    }*/
     divTablaElem.innerHTML += htmlCode;
 }
 function generateTableHead(table, data) {
