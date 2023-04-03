@@ -117,7 +117,7 @@ function id3(numLlamadas) {
                 + entropia(no[atr][key] / (si[atr][key] + no[atr][key])));
         }
     }
-
+    //se saca el menor merito
     let minimo = Object.values(merito)[0];
     let min_key = Object.keys(merito)[0];
     for(let value in merito) {
@@ -132,14 +132,6 @@ function id3(numLlamadas) {
     pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas);
 
     //se elimina el atributo con menor merito.
-    /*let columna_a_borrar = atributos[0];
-    for (const [columna, c] of atributos.entries()) {
-        if(c === minimo) {
-            columna_a_borrar = c;
-            break;
-        }
-    }*/
-
     atributos = atributos.filter(value => {
         return value != min_key
     })
@@ -208,13 +200,47 @@ function pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas) 
         htmlCode += '<br>'
 
         if(atributos.length === 3) {
-            htmlCode += '<br><h5 align="center"><i>Los atributos mínimos del árbol: ' + sol + '</i></h5>'
+            htmlCode += '<br><h5 align="center"><i>Los atributos mínimos del árbol: ' + sol + '</i></h5>';
+            //htmlCode += `<br><div id="tree-simple"></div>`;
+            generarArbol();
         }
     /*}
     else {
         htmlCode += '<br><h5 align="center"><i>Los atributos mínimos del árbol: ' + sol + '</i></h5>'
     }*/
     divTablaElem.innerHTML += htmlCode;
+}
+
+function generarArbol() {
+    const simple_chart_config = {
+        chart: {
+            container: "#tree-simple",
+            connectors: {
+                type: "straight"
+            }
+        },
+        
+        nodeStructure: {
+            text: { name: "TiempoExterior" },
+            children: [
+                {
+                    text: { name: "soleado" },
+                    children: [
+                        {
+                            text: {name: "Humedad"}
+                        }
+                    ]
+                },
+                {
+                    text: { name: "lluvioso" }
+                },
+                {
+                    text: { name: "nublado" }
+                }
+            ]
+        }
+    };
+    let my_chart = new Treant(simple_chart_config);
 }
 function generateTableHead(table, data) {
     let thead = table.createTHead();
