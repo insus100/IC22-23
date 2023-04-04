@@ -1,18 +1,36 @@
 let nombreAtribElem, nombreJuegoElem;
 let nombreAtrib, nombreJuego;
-let divTablaElem, tablaElem;
+let divTablaElem, tablaElem, divArbolElem;
 let errorMsgElem;
 let atributos = [];
 let juego = [];
 let resultado;
 let sol = [];
+const treeConfig = {
+    container: "#tree-simple",
+    connectors: {
+        type: "straight"
+    }
+    /*node: {
+        HTMLclass: 'nodeExample1'
+    }*/
+}
+let treeChart = [treeConfig];
+let padreHoja;//para el arbol
 function onPageLoad(){
     nombreAtribElem = document.getElementById("nomAtrib");
     nombreJuegoElem = document.getElementById("nomJuego");
     divTablaElem = document.getElementById("divTabla");
+    divArbolElem = document.getElementById("tree-simple");
     errorMsgElem = document.getElementById('msg');
-    nombreAtribElem.addEventListener('change', (event)=> readTextFile(event, atributos));
-    nombreJuegoElem.addEventListener('change', (event)=> readTextFile(event, juego, 1));
+    nombreAtribElem.addEventListener('change', (event)=> {
+        atributos = [];
+        readTextFile(event, atributos);
+    });
+    nombreJuegoElem.addEventListener('change', (event)=> {
+        juego = [];
+        readTextFile(event, juego, 1);
+    });
 }
 
 function readTextFile(event, dataObj, type = 0)//type 0 lee atributos, type 1 lee propiedades
@@ -65,6 +83,8 @@ function iniciar() {
         errorMsgElem.innerText = 'Debes seleccionar los ficheros de atributos y de juego.';
         return;
     }
+    divTablaElem.innerHTML = '';
+    divArbolElem.innerHTML = '';
     resultado = atributos[atributos.length - 1];
     sol = [];
     id3(0);
@@ -127,6 +147,16 @@ function id3(numLlamadas) {
         }
     }
     sol.push(min_key);
+
+    //construir hoja arbol
+    let hoja = {
+        text: {
+            name: min_key,
+        }
+    };
+    treeChart.push(hoja);
+    let nombreHijos = Object.keys(numeroAtrs[min_key]);//array de hijos (string)
+    nombreHijos.forEach((n) => treeChart.push({ parent: hoja, text: { name: n } }));
 
     //pintar tablas
     pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas);
@@ -212,7 +242,7 @@ function pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas) 
 }
 
 function generarArbol() {
-    const simple_chart_config = {
+    /*const simple_chart_config = {
         chart: {
             container: "#tree-simple",
             connectors: {
@@ -239,8 +269,8 @@ function generarArbol() {
                 }
             ]
         }
-    };
-    let my_chart = new Treant(simple_chart_config);
+    };*/
+    let my_chart = new Treant(treeChart);
 }
 function generateTableHead(table, data) {
     let thead = table.createTHead();
