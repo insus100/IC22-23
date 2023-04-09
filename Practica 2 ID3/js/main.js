@@ -3,7 +3,7 @@ let nombreAtrib, nombreJuego;
 let divTablaElem, tablaElem, divArbolElem;
 let errorMsgElem;
 let atributos = [];
-let juego = [];
+let juego = [], juego_copia = []; //juego_copia no se modifica.
 let resultado;
 let sol = [];
 const treeConfig = {
@@ -16,7 +16,7 @@ const treeConfig = {
     }*/
 }
 let treeChart = [treeConfig];
-let padreHoja;//para el arbol
+let hojasSueltas = [], ultimoMinKey;//para el arbol
 function onPageLoad(){
     nombreAtribElem = document.getElementById("nomAtrib");
     nombreJuegoElem = document.getElementById("nomJuego");
@@ -29,6 +29,7 @@ function onPageLoad(){
     });
     nombreJuegoElem.addEventListener('change', (event)=> {
         juego = [];
+        juego_copia = [];
         readTextFile(event, juego, 1);
     });
 }
@@ -62,6 +63,7 @@ function readTextFile(event, dataObj, type = 0)//type 0 lee atributos, type 1 le
                         const obj = {};
                         atributos.forEach((a, i) => obj[a] = row[i]);
                         dataObj.push(obj);
+                        juego_copia.push({...obj});
                     });
                     console.log(juego);
                 }
@@ -148,16 +150,82 @@ function id3(numLlamadas) {
     }
     sol.push(min_key);
 
-    //construir hoja arbol
-    let hoja = {
-        text: {
-            name: min_key,
+    //construir hoja arbol Movi, movi all the people movi
+    if(treeChart.length === 1) {
+        let hoja = {
+            text: {
+                name: min_key,
+            }
+        };
+        treeChart.push(hoja);
+        let nombreHijos = Object.keys(numeroAtrs[min_key]);//array de hijos (string)
+        nombreHijos.forEach((n) => treeChart.push({ parent: hoja, text: { name: n } }));
+        treeChart.forEach((node, i) => {
+            if(node.parent === hoja) {
+                if(numeroAtrs[min_key][node.text.name] === si[min_key][node.text.name]) {
+                    treeChart.push({ parent: node,  text: { name: "si" }, fin: true });
+                    nombreHijos.splice(nombreHijos.findIndex(n => n == node.text.name), 1);
+                } else if(numeroAtrs[min_key][node.text.name] === no[min_key][node.text.name]) {
+                    treeChart.push({ parent: node,  text: { name: "no" }, fin: true });
+                    nombreHijos.splice(nombreHijos.findIndex(n => n === node.text.name), 1);
+                }
+            }
+        })
+        hojasSueltas = nombreHijos;
+        ultimoMinKey = min_key;
+    } else {
+        let hijoSi = {}, hijoNo = {}, total = {};
+        let nombreHijos = Object.keys(numeroAtrs[min_key]);
+        for(let hoja of hojasSueltas) {
+            if(!hijoSi[hoja]) hijoSi[hoja] = {};
+            if(!hijoNo[hoja]) hijoNo[hoja] = {};
+            if(!total[hoja]) total[hoja] = {};
+            for(hijo of nombreHijos) {
+                if(!hijoSi[hoja][hijo]) hijoSi[hoja][hijo] = 0;
+                if(!hijoNo[hoja][hijo]) hijoNo[hoja][hijo] = 0;
+                if(!total[hoja][hijo]) total[hoja][hijo] = 0;
+                for(obj of juego_copia) {
+                    if(obj[ultimoMinKey] === hoja && obj[min_key] === hijo){
+                        if(obj[resultado] == 'si') hijoSi[hoja][hijo]++;
+                        else if(obj[resultado] == 'no') hijoNo[hoja][hijo]++;
+                        total[hoja][hijo]++;
+                    }
+                }
+            }
         }
-    };
-    treeChart.push(hoja);
-    let nombreHijos = Object.keys(numeroAtrs[min_key]);//array de hijos (string)
-    nombreHijos.forEach((n) => treeChart.push({ parent: hoja, text: { name: n } }));
-
+        //console.log("hijoSi", hijoSi);
+        //console.log("hijoNo", hijoNo);
+        //console.log("total", total);
+        let hojaElegida, coincidencias = 0, hojaCoincidencias;
+        for(let hoja of hojasSueltas) {
+            for(hijo of nombreHijos) {
+                if(total[hoja][hijo] === hijoSi[hoja][hijo] || total[hoja][hijo] === hijoNo[hoja][hijo]){
+                    hojaCoincidencias = hoja;
+                    coincidencias++;//hojaElegida es el padre.
+                }
+            }
+        }
+        if(coincidencias === nombreHijos.length) hojaElegida = hojaCoincidencias;
+        //console.log("coincidencias", coincidencias, hojaCoincidencias);
+        //console.log("hojaElegida", hojaElegida);
+        hojasSueltas.splice(hojasSueltas.findIndex(n => n === hojaElegida), 1);
+        let hoja2 = { text: { name: min_key }, parent: treeChart.find(n => n.text && n.text.name && n.text.name === hojaElegida) }
+        treeChart.push(hoja2);
+        nombreHijos.forEach((n) => treeChart.push({ parent: hoja2, text: { name: n } }));
+        
+        treeChart.forEach((node, i) => {
+            if(node.parent === hoja2) {
+                if(total[hojaElegida][node.text.name] === hijoSi[hojaElegida][node.text.name]) {
+                    treeChart.push({ parent: node,  text: { name: "si" }, fin: true });
+                    nombreHijos.splice(nombreHijos.findIndex(n => n == node.text.name), 1);
+                } else if(total[hojaElegida][node.text.name] === hijoNo[hojaElegida][node.text.name]) {
+                    treeChart.push({ parent: node,  text: { name: "no" }, fin: true });
+                    nombreHijos.splice(nombreHijos.findIndex(n => n === node.text.name), 1);
+                }
+            }
+        });
+        hojasSueltas.concat(nombreHijos);
+    }
     //pintar tablas
     pintarTablas(merito, numeroAtrs, si, no, min_key, minimo, numLlamadas);
 
