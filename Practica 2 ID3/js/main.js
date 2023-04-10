@@ -88,6 +88,7 @@ function iniciar() {
     divTablaElem.innerHTML = '';
     divArbolElem.innerHTML = '';
     resultado = atributos[atributos.length - 1];
+    treeChart = [treeConfig];
     sol = [];
     id3(0);
 }
