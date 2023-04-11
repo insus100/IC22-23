@@ -6,6 +6,17 @@ class Vector4 {
         this.w = w;
     }
 }
+const algorismos = {
+    kmedias: {
+        tolerancia: 0.01,
+        pesoExponencial: 2
+    },
+    lloyd: {
+        tolerancia: 0.0000000001,
+        maxIteraciones: 10,
+        razonAprendizaje: 0.1
+    }
+}
 let nombreAtribElem, nombreJuegoElem;
 let nombreAtrib, nombreJuego;
 let divTablaElem, tablaElem;
@@ -59,26 +70,6 @@ function readTextFile(event, type = 0)//type 0 lee atributos, type 1 lee propied
                     ejemplo[row[4]] = new Vector4(parseFloat(row[0]), parseFloat(row[1]), parseFloat(row[2]), parseFloat(row[3]));
                     console.log(ejemplo);
                 }
-                /*if(type === 0) {
-                    atributos = result.split(",");
-                    //let a = [];
-                    atributos.forEach((e, i) => atributos[i] = e.replace(/(?:\r\n|\r|\n)/g, ''));
-                    console.log(atributos);
-                } else {
-                    
-                    let result2 = result.replace(/(?:\r|\r|)/g, '');
-                    let rows = result2.split('\n');
-                    rows = rows.filter((str) => str !== '');
-                    rows.forEach((e, i) => {
-                        const row = e.split(",");
-                        const obj = {};
-                        atributos.forEach((a, i) => obj[a] = row[i]);
-                        dataObj.push(obj);
-                        juego_copia.push({...obj});
-                    });
-                    console.log(juego);
-                }*/
-
          })
          reader.readAsText(fileList[0]);
     }
