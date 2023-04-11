@@ -1,0 +1,9 @@
+.red {
+    background-color: lightsalmon;
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
+.buttonIniciar {
+    margin-top: 2em;
+}
