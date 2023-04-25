@@ -22,9 +22,11 @@
                   <label for="nomJuego" class="form-label">Fichero de ejemplo</label>
                   <input type="file" class="form-control" id="nomJuego" placeholder="Fichero de ejemplo">
                 </div>
-                <div class="col-auto">
-                  <button type="button" id="buttonJugar" class="btn btn-primary buttonIniciar" onclick="buttonClick('iniciar')">Ejecutar algoritmos</button>
-              </div>
+                <div class="col-auto btn-group buttonIniciar" role="group">
+                  <button type="button" class="btn btn-primary" onclick="buttonClick('kmedias')">K-medias</button>
+                  <button type="button" class="btn btn-primary" onclick="buttonClick('bayes')">Bayes</button>
+                  <button type="button" class="btn btn-primary" onclick="buttonClick('lloyd')">Lloyd</button>
+                </div>
             </div>
             <p id="msg" class="text-danger"></p>
         </div>
