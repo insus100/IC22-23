@@ -1,9 +1,9 @@
 class Vector4 {
     constructor(x, y, z, w) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.w = w;
+        x = x;
+        y = y;
+        z = z;
+        w = w;
     }
 }
 const algorismos = {
@@ -91,57 +91,61 @@ function buttonClick(mode) {
     }
 }
 
-function _p(x, v, i, j, b, clases) {
-    let exp = 1 / (b - 1)
-
-    let d = _d(x, v, i, j)
-    if (d == 0.0) { return 1.0; }
-
-    let num = (1 / d) ** exp;
-    let den = 0;
-    for (let r = 0; r < clases; r++) {
-        den += (1 / _d(r, j)) ** exp;
-    }
-    return num / den
-}
-
-function _d(x, v, i, j) {
-    let sum = 0;
-    for (let k = 0; k < x.length; k++)
-        sum += (x[k][j] - v[i]) ** 2;
-
-    return sum;
-}
-
 function asignarFila(m, row, value) {
     for (let j = 0; j < m[row].length; j++) {
         m[row][j] = value;
     }
 }
+
+function _p(x, v, i, j, b, clases) {
+    const exp = 1 / (b - 1);
+
+    const d = _d(x, v, i, j);
+    if (d === 0.0) {
+        return 1.0;
+    }
+
+    let num = Math.pow((1 / d), exp);
+    let den = 0;
+    for (let r = 0; r < clases; r++) {
+        den += Math.pow((1 / _d(x, v, r, j)), exp);
+    }
+    return num / den;
+}
+
+function _d(x, v, i, j) {
+    let sum = 0;
+    for (let k = 0; k < x.length; k++) {
+        sum += Math.pow((x[k][j] - v[i][j]), 2);
+    }
+    return sum;
+}
+
 function kmedias(x, v, b, epsilon, clases) {
     let done = false;
     while (!done) {
-        let u = Array.from(new Array(x.length), _ => Array(x[0].length).fill(0));
+        let u = Array.from(new Array(clases), _ => Array(x[0].length).fill(0));
         let new_v = Array.from(new Array(v.length), _ => Array(v[0].length).fill(0));
 
         for (let i = 0; i < clases; i++) {
             let num = 0, den = 0;
-            for (let j = 0; j < x.length; j++) {
+            for (let j = 0; j < x[0].length; j++) {
                 let p = _p(x, v, i, j, b, clases)
-                u[i, j] = p
-                let aux = p ** b
-                for (let k = 0; k < x.length; k++) num += aux * x[k][j];
+                u[i][j] = p;
+                let aux = p ** b;
+                for (let k = 0; k < x.length; k++) {num += aux * x[k][j];}
                 den += aux
             }
-            asignarFila(new_v, i, (num/den));
+            asignarFila(new_v, i, (num / den));
         }
 
-        let max_delta = 0;
+        let max_delta = 0.0;
         for (let i = 0; i < clases; i++) {
-            let delta = Math.sqrt(
-                new_v[i].map((val, j) => Math.pow(v[i][j] - val, 2))
-                         .reduce((acc, curr) => acc + curr, 0)
-              );
+            let sum = 0;
+            for (let k = 0; k < v[i].length; k++) {
+                sum += Math.pow(v[i][k] - new_v[i][k], 2);
+            }
+            let delta = Math.sqrt(sum);
             console.log("delta", delta);
             max_delta = Math.max(max_delta, delta)
         }
@@ -151,11 +155,12 @@ function kmedias(x, v, b, epsilon, clases) {
         console.log("max_delta", max_delta);
 
         v = new_v
-        if(max_delta <= epsilon)
+        if(max_delta <= epsilon || isNaN(max_delta))
         {
-            console.log(v);
             done = true;
+            //console.log(v);
         }
-            
     }
+    console.log(v);
+    return v;
 }
