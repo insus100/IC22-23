@@ -79,12 +79,18 @@ function buttonClick(mode) {
             arr = arr.concat(datos[k]);
         });
         //console.log(arr);
-        kmedias(arr, centrosIniciales, 2, 0.01, 2);
+        exec_kmedias(arr, centrosIniciales, 2, 0.01, 2);
     } else if (mode === 'bayes') {
         exec_bayes();
     } else if (mode === 'lloyd') {
 
     }
+}
+
+function exec_kmedias(x, v, b, epsilon, clases) {
+    const k = new KMeans(x, v, b, epsilon, clases);
+
+    console.log(k.calculate());
 }
 
 function exec_bayes() {
