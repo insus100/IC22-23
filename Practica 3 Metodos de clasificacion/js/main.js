@@ -1,14 +1,3 @@
-const algorismos = {
-    kmedias: {
-        tolerancia: 0.01,
-        pesoExponencial: 2
-    },
-    lloyd: {
-        tolerancia: 0.0000000001,
-        maxIteraciones: 10,
-        razonAprendizaje: 0.1
-    }
-}
 let nombreAtribElem, nombreJuegoElem;
 let nombreAtrib, nombreJuego;
 let tablaElem, divTablaElem;
@@ -81,7 +70,7 @@ function buttonClick(mode) {
     } else if (mode === 'bayes') {
         exec_bayes();
     } else if (mode === 'lloyd') {
-
+        exec_lloyd();
     }
 }
 
@@ -130,6 +119,19 @@ function exec_bayes() {
     divTablaElem.innerHTML += `<h5>[${ejemplo[testName]}] clasificado como clase: ${b.classify(ejemplo[testName])}</h5>`;
 }
 
+function exec_lloyd() {
+    let arr = [];
+    Object.keys(datos).forEach(k => arr = arr.concat(datos[k]));
+
+    const l = new Lloyd(arr, centrosIniciales, algorismos.lloyd.tolerancia, algorismos.lloyd.maxIteraciones, algorismos.lloyd.razonAprendizaje);
+    const result = l.calculate(divTablaElem);
+    console.log("result lloyd", result);
+    const testName = Object.keys(ejemplo)[0];
+    divTablaElem.innerHTML += `<h5>Clasificación LLoyd:</h5>`;
+    divTablaElem.innerHTML += `<h5>[${ejemplo[testName]}] (${testName}) clasificado como clase: ${l.classify(result, ejemplo[testName])}</h5>`;
+    divTablaElem.classList.remove('hide');
+}
+
 
 function generateTable(table, data) {
     for (let vector of data) {
@@ -139,5 +141,14 @@ function generateTable(table, data) {
             let text = document.createTextNode(num);
             cell.appendChild(text);
         }
+    }
+}
+
+function generateTable2(table, data) {//data is a vector directly
+    let row = table.insertRow();
+    for (num of data) {
+        let cell = row.insertCell();
+        let text = document.createTextNode(num);
+        cell.appendChild(text);
     }
 }
