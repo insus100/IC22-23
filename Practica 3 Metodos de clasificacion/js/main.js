@@ -1,11 +1,3 @@
-class Vector4 {
-    constructor(x, y, z, w) {
-        x = x;
-        y = y;
-        z = z;
-        w = w;
-    }
-}
 const algorismos = {
     kmedias: {
         tolerancia: 0.01,
@@ -19,7 +11,7 @@ const algorismos = {
 }
 let nombreAtribElem, nombreJuegoElem;
 let nombreAtrib, nombreJuego;
-let divTablaElem, tablaElem;
+let tablaElem, divTablaElem;
 let errorMsgElem;
 let datos = {}, ejemplo = {};
 let resultado;
@@ -28,8 +20,9 @@ const centrosIniciales = [[4.6, 3.0, 4.0, 0.0], [6.8, 3.4, 4.6, 0.7]];
 function onPageLoad() {
     nombreAtribElem = document.getElementById("nomAtrib");
     nombreJuegoElem = document.getElementById("nomJuego");
-    divTablaElem = document.getElementById("divTabla");
+    tablaElem = document.getElementById("table");
     errorMsgElem = document.getElementById('msg');
+    divTablaElem = document.getElementById('results');
     nombreAtribElem.addEventListener('change', (event) => {
         datos = {};
         readTextFile(event);
@@ -38,6 +31,7 @@ function onPageLoad() {
         ejemplo = {};
         readTextFile(event, 1);
     });
+    
 }
 
 function readTextFile(event, type = 0)//type 0 lee atributos, type 1 lee propiedades
@@ -76,6 +70,8 @@ function readTextFile(event, type = 0)//type 0 lee atributos, type 1 lee propied
 }
 
 function buttonClick(mode) {
+    divTablaElem.innerHTML = '';
+    divTablaElem.classList.add('hide');
     //console.log("buttonClick", mode);
     if (mode === 'kmedias') {
         let arr = []
@@ -85,13 +81,60 @@ function buttonClick(mode) {
         //console.log(arr);
         kmedias(arr, centrosIniciales, 2, 0.01, 2);
     } else if (mode === 'bayes') {
-
+        exec_bayes();
     } else if (mode === 'lloyd') {
 
     }
 }
 
-function asignarFila(m, row, value) {
+function exec_bayes() {
+    const b = new Bayes(4);//4 tamaño del vector de datos
+    Object.keys(datos).forEach(k => {//k es el nombre de la clase
+        datos[k].forEach(arr => b.add_x(arr, k));
+    });
+    //console.log(b);
+    console.log("Carga finalizada Bayes.");
+    b.training();
+    for(let c in b.get_classes()) {
+        console.log("Clase", c);
+        divTablaElem.innerHTML += `<h1>${c}</h1>`
+        divTablaElem.innerHTML += `<table class="table table-bordered table-striped table-dark table-sm mb-3" id="tabla-${c}-1"></table>`;
+        divTablaElem.innerHTML += `<table class="table table-bordered table-striped table-dark table-sm mb-3" id="tabla-${c}-2"></table>`;
+        generateTable(document.getElementById(`tabla-${c}-1`), [b.get_class(c).get_m_vector()])
+        generateTable(document.getElementById(`tabla-${c}-2`), b.get_class(c).get_c_matrix())
+        console.log("M: ", b.get_class(c).get_m_vector());
+        console.log("C: ", b.get_class(c).get_c_matrix());
+        console.log("---------------------------------");
+    }
+    divTablaElem.classList.remove('hide');
+    const testName = Object.keys(ejemplo)[0];
+
+    console.log("\n>>> Clasificación Bayes \n");
+    console.log("Test 1:");
+    console.log(ejemplo[testName], " clasificado como clase ", b.classify(ejemplo[testName]));
+
+    divTablaElem.innerHTML += `<h5>Clasificación Bayes:</h5>`;
+    divTablaElem.innerHTML += `<h5>[${ejemplo[testName]}] clasificado como clase: ${b.classify(ejemplo[testName])}</h5>`;
+    /*console.log("\nTest 2:");
+    console.log(test2, " clasificado como clase ", bayes.classify(test2));
+    console.log("\nTest 3:");
+    console.log(test3, " clasificado como clase ", bayes.classify(test3));
+    console.log("\n");*/
+
+}
+
+
+function generateTable(table, data) {
+    for (let vector of data) {
+        let row = table.insertRow();
+        for (num of vector) {
+            let cell = row.insertCell();
+            let text = document.createTextNode(num);
+            cell.appendChild(text);
+        }
+    }
+}
+/*function asignarFila(m, row, value) {
     for (let j = 0; j < m[row].length; j++) {
         m[row][j] = value;
     }
@@ -163,4 +206,4 @@ function kmedias(x, v, b, epsilon, clases) {
     }
     console.log(v);
     return v;
-}
+}*/
