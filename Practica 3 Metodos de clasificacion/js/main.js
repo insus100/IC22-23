@@ -109,7 +109,9 @@ function exec_bayes() {
     for(let c in b.get_classes()) {
         console.log("Clase", c);
         divTablaElem.innerHTML += `<h1>${c}</h1>`
+        divTablaElem.innerHTML += `<h5>Vector - M:</h5>`
         divTablaElem.innerHTML += `<table class="table table-bordered table-striped table-dark table-sm mb-3" id="tabla-${c}-1"></table>`;
+        divTablaElem.innerHTML += `<h5>Matriz - C:</h5>`
         divTablaElem.innerHTML += `<table class="table table-bordered table-striped table-dark table-sm mb-3" id="tabla-${c}-2"></table>`;
         generateTable(document.getElementById(`tabla-${c}-1`), [b.get_class(c).get_m_vector()])
         generateTable(document.getElementById(`tabla-${c}-2`), b.get_class(c).get_c_matrix())
