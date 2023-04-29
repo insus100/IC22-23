@@ -75,11 +75,9 @@ function buttonClick(mode) {
     //console.log("buttonClick", mode);
     if (mode === 'kmedias') {
         let arr = []
-        Object.keys(datos).forEach(k => {
-            arr = arr.concat(datos[k]);
-        });
+        Object.keys(datos).forEach(k => arr = arr.concat(datos[k]));
         //console.log(arr);
-        exec_kmedias(arr, centrosIniciales, 2, 0.01, 2);
+        exec_kmedias(arr, centrosIniciales, algorismos.kmedias.pesoExponencial, algorismos.kmedias.tolerancia, 2);
     } else if (mode === 'bayes') {
         exec_bayes();
     } else if (mode === 'lloyd') {
@@ -88,9 +86,16 @@ function buttonClick(mode) {
 }
 
 function exec_kmedias(x, v, b, epsilon, clases) {
-    const k = new KMeans(x, v, b, epsilon, clases);
+    const k = new KMeans(math.transpose(x), v, b, epsilon, clases);
+    const result = k.calculate(divTablaElem);//le pasamos el elemento div para ir pintando lo que hace el algorismo,
+    console.log(result);
 
-    console.log(k.calculate());
+    const testName = Object.keys(ejemplo)[0];
+
+    divTablaElem.innerHTML += `<h5>Clasificación Kmedias:</h5>`;
+    divTablaElem.innerHTML += `<h5>[${ejemplo[testName]}] (${testName}) clasificado como clase: ${k.classify(result, ejemplo[testName])}</h5>`;
+
+    divTablaElem.classList.remove('hide');
 }
 
 function exec_bayes() {
@@ -121,12 +126,6 @@ function exec_bayes() {
 
     divTablaElem.innerHTML += `<h5>Clasificación Bayes:</h5>`;
     divTablaElem.innerHTML += `<h5>[${ejemplo[testName]}] clasificado como clase: ${b.classify(ejemplo[testName])}</h5>`;
-    /*console.log("\nTest 2:");
-    console.log(test2, " clasificado como clase ", bayes.classify(test2));
-    console.log("\nTest 3:");
-    console.log(test3, " clasificado como clase ", bayes.classify(test3));
-    console.log("\n");*/
-
 }
 
 
@@ -140,76 +139,3 @@ function generateTable(table, data) {
         }
     }
 }
-/*function asignarFila(m, row, value) {
-    for (let j = 0; j < m[row].length; j++) {
-        m[row][j] = value;
-    }
-}
-
-function _p(x, v, i, j, b, clases) {
-    const exp = 1 / (b - 1);
-
-    const d = _d(x, v, i, j);
-    if (d === 0.0) {
-        return 1.0;
-    }
-
-    let num = Math.pow((1 / d), exp);
-    let den = 0;
-    for (let r = 0; r < clases; r++) {
-        den += Math.pow((1 / _d(x, v, r, j)), exp);
-    }
-    return num / den;
-}
-
-function _d(x, v, i, j) {
-    let sum = 0;
-    for (let k = 0; k < x.length; k++) {
-        sum += Math.pow((x[k][j] - v[i][j]), 2);
-    }
-    return sum;
-}
-
-function kmedias(x, v, b, epsilon, clases) {
-    let done = false;
-    while (!done) {
-        let u = Array.from(new Array(clases), _ => Array(x[0].length).fill(0));
-        let new_v = Array.from(new Array(v.length), _ => Array(v[0].length).fill(0));
-
-        for (let i = 0; i < clases; i++) {
-            let num = 0, den = 0;
-            for (let j = 0; j < x[0].length; j++) {
-                let p = _p(x, v, i, j, b, clases)
-                u[i][j] = p;
-                let aux = p ** b;
-                for (let k = 0; k < x.length; k++) {num += aux * x[k][j];}
-                den += aux
-            }
-            asignarFila(new_v, i, (num / den));
-        }
-
-        let max_delta = 0.0;
-        for (let i = 0; i < clases; i++) {
-            let sum = 0;
-            for (let k = 0; k < v[i].length; k++) {
-                sum += Math.pow(v[i][k] - new_v[i][k], 2);
-            }
-            let delta = Math.sqrt(sum);
-            console.log("delta", delta);
-            max_delta = Math.max(max_delta, delta)
-        }
-        console.log("centros:", v);
-        console.log("nuevos centros:", new_v);
-        console.log("matriz de pertenencia:", u);
-        console.log("max_delta", max_delta);
-
-        v = new_v
-        if(max_delta <= epsilon || isNaN(max_delta))
-        {
-            done = true;
-            //console.log(v);
-        }
-    }
-    console.log(v);
-    return v;
-}*/
