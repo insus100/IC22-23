@@ -76,6 +76,7 @@ function buttonClick(mode) {
 
 function exec_kmedias(x, v, b, epsilon, clases) {
     const k = new KMeans(math.transpose(x), v, b, epsilon, clases);
+    divTablaElem.innerHTML += `<h1>Tolerancia: ${epsilon}</h1>`;
     const result = k.calculate(divTablaElem);//le pasamos el elemento div para ir pintando lo que hace el algorismo,
     console.log(result);
 

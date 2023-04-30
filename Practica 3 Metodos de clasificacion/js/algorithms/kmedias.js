@@ -78,7 +78,7 @@ class KMeans {
         drawer.innerHTML += `<div class="table-responsive"><table class="table table-bordered table-striped table-dark table-sm mb-3" id="tabla-matrix-${cont}"></table></div>`;
         generateTable(document.getElementById(`tabla-matrix-${cont}`), u);
 
-        drawer.innerHTML += `<h1>Delta: ${max_delta}</h1>`;
+        drawer.innerHTML += `<h1>Delta: ${max_delta} ${(max_delta < this.epsilon ? '<' : '>')} ${this.epsilon}</h1>`;
         console.log(`centros:\n${this.v}\n`
                     + `nuevos centros:\n${new_v}\n`
                     + `matriz de pertenencia:\n${u}\n`
